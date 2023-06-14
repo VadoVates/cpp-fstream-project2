@@ -25,6 +25,9 @@ float TheHighestPGA(STUDENT*, int);
 int ListOfStudentsWithTheHighestPGA(STUDENT*, float, int);
 bool SaveToTheFile(STUDENT*, float, int, string);
 bool FindString(STUDENT*, int, const string&);
+int Partition(int[], int, int);
+void QuickSort(int[], int, int);
+void GradeRepresentation (STUDENT*, int);
 void ShowMenu(STUDENT*, int);
 
 int main()
@@ -217,7 +220,6 @@ bool FindString(STUDENT* arr, int N, const string& searchStr)
                 cout << setw(5) << fixed << setprecision(2) << arr[i].oceny[j] << " ";
             }
             cout << arr[i].sredniaOcen << endl;
-
         }
     }
 
@@ -241,8 +243,9 @@ void ShowMenu(STUDENT* arr, int N)
         cout << "1. Wyswietl dane wszystkich studentow"<<endl;
         cout << "2. Ilu studentow posiada srednia ocen powyzej sredniej wszystkich studentow "<<endl;
         cout << "3. Wylistuj studentow z najwyzsza srednia i zapisz do pliku"<<endl;
-        cout << "4. Wyszukaj studenta"<<endl;;
-        cout << "0. Wyjscie"<<endl;;
+        cout << "4. Wyszukaj studenta"<<endl;
+        cout << "5. Reprezentacja statystyczna przyznanych ocen" << endl;
+        cout << "0. Wyjscie"<<endl;
         cout << "Wybierz opcje: ";
         cin >> choice;
 
@@ -288,10 +291,66 @@ void ShowMenu(STUDENT* arr, int N)
                 FindString(arr, N, searchStr);
                 break;
             }
+            case 5:
+            {
+                cout << endl;
+                GradeRepresentation(arr, N);
+            }
             case 0:
                 return;
             default:
                 cout << "Niepoprawna opcja. Wybierz ponownie." << endl;
         }
     }
+}
+
+int Partition(int array[], int left, int right) {
+    int pivotIndex = left + (right - left) / 2;
+    int pivotValue = array[pivotIndex];
+    int i = left, j = right;
+    int temp;
+    while(i <= j) {
+        while(array[i] < pivotValue) {
+            i++;
+        }
+        while(array[j] > pivotValue) {
+            j--;
+        }
+        if(i <= j) {
+            temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+            i++;
+            j--;
+        }
+    }
+    return i;
+}
+
+void QuickSort(int array[], int left, int right) {
+    if(left < right) {
+        int pivotIndex = Partition (array, left, right);
+        QuickSort(array, left, pivotIndex - 1);
+        QuickSort(array, pivotIndex, right);
+    }
+}
+
+void GradeRepresentation (STUDENT *arr, int N) {
+    int gradeArraySize = N*gradeQty;
+    int *gradeArray = new int [gradeArraySize];
+    
+    for (int i=0; i<N; i++) {
+        int rowNumber = i*gradeQty;
+        for (int j=0; j<gradeQty; j++) {
+            gradeArray[rowNumber+j] = (int) (arr[i].oceny[j] * 2);
+        }
+    }
+
+    QuickSort (gradeArray, 0, gradeArraySize-1);
+
+    for (int i=0; i<gradeArraySize; i++) {
+        cout << gradeArray [i] << " ";
+    }
+
+    delete []gradeArray;
 }
