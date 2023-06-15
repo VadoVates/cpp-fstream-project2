@@ -1,3 +1,6 @@
+//Autorzy: FILIP BARSZCZ (nr indeksu: 155624) oraz MAREK GÓRSKI (nr indeksu: 155647).
+//Grupa D1, semestr II, rok akademicki 2022/2023, kierunek Informatyka
+
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -8,12 +11,13 @@
 
 using namespace std;
 
-const int gradeQty = 5;
+const int gradeQtyPerStudent = 5;
+const int gradeRangeQty = 7;
 
 struct STUDENT
 {
     string im_nazwisko;
-    float oceny[gradeQty];
+    float oceny[gradeQtyPerStudent];
     float sredniaOcen;
 };
 
@@ -22,18 +26,20 @@ void DrawingRandomNumbersAndFillingArray(ifstream&, STUDENT*, int);
 int HowManyStudensHaveHigherGradeThanTheAverage(STUDENT*, int);
 void DisplayStudentsData(STUDENT*, int);
 float TheHighestPGA(STUDENT*, int);
-int ListOfStudentsWithTheHighestPGA(STUDENT*, float, int);
+void ListOfStudentsWithTheHighestPGA(STUDENT*, float, int);
 bool SaveToTheFile(STUDENT*, float, int, string);
 bool FindString(STUDENT*, int, const string&);
-int Partition(int[], int, int);
-void QuickSort(int[], int, int);
-void GradeRepresentation (STUDENT*, int);
+void Histogram (STUDENT*, int);
 void ShowMenu(STUDENT*, int);
 
 int main()
 {
     srand(time(0));
-    cout << "PROGRAM ODCZYTUJACY DANE STUDENTOW Z PLIKU" << endl;
+    for (int i=0; i<71;i++) cout << "-";
+    cout << endl;
+    cout << "PROJEKT ZALICZENIOWY 2_2 Z PRZEDMIOTU PODSTAWY PROGRAMOWANIA 2" << endl;
+    for (int i=0; i<71;i++) cout << "-";
+    cout << endl << endl;
     int N, numberOfLines;
     string fileName, searchStr;
     ifstream fileInput;
@@ -44,10 +50,10 @@ int main()
         cout << "Otwarcie pliku \"dane.txt\", zakonczone niepowodzeniem. Koniec programu." << endl;
         return 1;
     }
-    cout << "Podaj ilu jest studentow: ";
+    cout << "Podaj ilu studentow chcesz wczytac (zliczono max. ilosc studentow: " << numberOfLines << "): ";
     cin >> N;
     if (N>numberOfLines) {
-        cout << "Podana ilosc studentow jest wieksza niz wystepuje w pliku. Wczytano max studentow, czyli: " << numberOfLines << endl;
+        cout << "Podana ilosc studentow jest wieksza niz wystepuje w pliku. Wczytano max studentow, czyli: " << numberOfLines << "." << endl;
         N = numberOfLines;
     }
     STUDENT* arr = new STUDENT[N];
@@ -88,12 +94,12 @@ void DrawingRandomNumbersAndFillingArray(ifstream& myFile, STUDENT* arr, int arr
             myFile.close();
             exit(1);
         }
-        for (int j = 0; j < gradeQty; j++)
+        for (int j = 0; j < gradeQtyPerStudent; j++)
         {
             arr[i].oceny[j] = (rand() % 7) / 2.0 + 2.0;
             sum += arr[i].oceny[j];
         }
-        arr[i].sredniaOcen = sum / gradeQty;
+        arr[i].sredniaOcen = sum / gradeQtyPerStudent;
     }
 }
 
@@ -130,9 +136,9 @@ void DisplayStudentsData(STUDENT* arr, int N)
     {
         cout << setw(20) << left << arr[i].im_nazwisko;
         cout << " | ";
-        for (int j = 0; j < gradeQty; j++)
+        for (int j = 0; j < gradeQtyPerStudent; j++)
         {
-            cout << setw(5) << fixed << setprecision(2) << arr[i].oceny[j] << " ";
+            cout << setw(5) << fixed << setprecision(1) << arr[i].oceny[j] << " ";
         }
         cout << " | " << setw(7) << fixed << setprecision(2) << arr[i].sredniaOcen << endl;
     }
@@ -152,7 +158,7 @@ float TheHighestPGA(STUDENT* arr, int N)
     return theHighestPGA;
 }
 
-int ListOfStudentsWithTheHighestPGA(STUDENT* arr, float theBestPGA, int N)
+void ListOfStudentsWithTheHighestPGA(STUDENT* arr, float theBestPGA, int N)
 {
     int studentsNumber = 0;
     cout<<endl;
@@ -160,21 +166,22 @@ int ListOfStudentsWithTheHighestPGA(STUDENT* arr, float theBestPGA, int N)
     {
         if (arr[i].sredniaOcen == theBestPGA)
         {
-            cout << " " << studentsNumber + 1 << ". " << arr[i].im_nazwisko << " ";
-            for (int j = 0; j < gradeQty; j++)
+            cout << " " << studentsNumber + 1 << ". " << arr[i].im_nazwisko << ", oceny: ";
+            for (int j = 0; j < gradeQtyPerStudent; j++)
             {
-                cout << setw(5) << fixed << setprecision(2) << arr[i].oceny[j] << " ";
+                cout << setw(3) << fixed << setprecision(1) << arr[i].oceny[j];
+                cout << ", ";
             }
-            cout << arr[i].sredniaOcen << endl;
+            cout << "srednia ocen: " << arr[i].sredniaOcen << "." << endl;
             studentsNumber++;
         }
     }
-    return studentsNumber;
+
 }
 
-bool SaveToTheFile(STUDENT* arr, float TheHighestPGA, int N, string fileName)
+bool SaveToTheFile(STUDENT* arr, float TheHighestPGA, int N, string fileSave)
 {
-    ofstream outputfile(fileName, ios::out);
+    ofstream outputfile(fileSave, ios::out);
 
     if (!outputfile)
     {
@@ -182,18 +189,28 @@ bool SaveToTheFile(STUDENT* arr, float TheHighestPGA, int N, string fileName)
         return false;
     }
 
+    int studentsNumber = 1;
     for (int i = 0; i < N; i++)
     {
         if (arr[i].sredniaOcen == TheHighestPGA)
         {
-            outputfile << arr[i].im_nazwisko << " ";
-            for (int j = 0; j < gradeQty; j++)
+            if (studentsNumber > 1) outputfile << endl;
+            outputfile << " " << studentsNumber;
+            outputfile << ". ";
+            outputfile << arr[i].im_nazwisko;
+            outputfile << ", oceny: ";
+            for (int j = 0; j < gradeQtyPerStudent; j++)
             {
-                outputfile << arr[i].oceny[j] << " ";
+                outputfile << fixed << setprecision (1) << arr[i].oceny[j];
+                outputfile << ", ";
             }
-            outputfile << arr[i].sredniaOcen << endl;
+            outputfile << "srednia ocen: ";
+            outputfile << arr[i].sredniaOcen;
+            outputfile << ".";
+            studentsNumber++;
         }
     }
+
     outputfile.close();
     return true;
 }
@@ -215,7 +232,7 @@ bool FindString(STUDENT* arr, int N, const string& searchStr)
             cout << "Student " << arr[i].im_nazwisko << " znaleziony na pozycji " << i + 1 << endl;
             cout<<endl;
             cout << " " << i + 1 << ". " << arr[i].im_nazwisko << " ";
-            for (int j = 0; j < gradeQty; j++)
+            for (int j = 0; j < gradeQtyPerStudent; j++)
             {
                 cout << setw(5) << fixed << setprecision(2) << arr[i].oceny[j] << " ";
             }
@@ -242,9 +259,9 @@ void ShowMenu(STUDENT* arr, int N)
         cout << "======= MENU =======\n";
         cout << "1. Wyswietl dane wszystkich studentow"<<endl;
         cout << "2. Ilu studentow posiada srednia ocen powyzej sredniej wszystkich studentow "<<endl;
-        cout << "3. Wylistuj studentow z najwyzsza srednia i zapisz do pliku"<<endl;
+        cout << "3. Wylistuj studenta (lub studentow) z najwyzsza srednia i zapisz do pliku"<<endl;
         cout << "4. Wyszukaj studenta"<<endl;
-        cout << "5. Reprezentacja statystyczna przyznanych ocen" << endl;
+        cout << "5. Reprezentacja graficzna ilosci przyznanych ocen - histogram" << endl;
         cout << "0. Wyjscie"<<endl;
         cout << "Wybierz opcje: ";
         cin >> choice;
@@ -266,19 +283,24 @@ void ShowMenu(STUDENT* arr, int N)
             case 3:
             {
                 float theHighestPGA = TheHighestPGA(arr, N);
-                int numberOfStudents = ListOfStudentsWithTheHighestPGA(arr, theHighestPGA, N);
-                string fileName;
+                ListOfStudentsWithTheHighestPGA(arr, theHighestPGA, N);
+                string fileSave;
                 cout<<endl;
-                cout << "Podaj nazwe pliku do zapisu: ";
-                cin >> fileName;
+                char doYouWantToSaveData;
+                cout << "Czy chcesz zapisac dane do pliku [t]? ";
+                cin >> doYouWantToSaveData;
+                if (doYouWantToSaveData == 't' || doYouWantToSaveData == 'T') {
+                    cout << "Podaj nazwe pliku do zapisu: ";
+                    cin >> fileSave;
 
-                if (SaveToTheFile(arr, theHighestPGA, numberOfStudents, fileName))
-                {
-                    cout << "Dane zostaly zapisane do pliku \"" << fileName << "\"" << endl;
-                }
-                else
-                {
-                    cout << "Blad podczas zapisywania do pliku." << endl;
+                    if (SaveToTheFile(arr, theHighestPGA, N, fileSave))
+                    {
+                        cout << "Dane zostaly zapisane do pliku \"" << fileSave << "\"" << endl;
+                    }
+                    else
+                    {
+                        cout << "Blad podczas zapisywania do pliku." << endl;
+                    }
                 }
                 break;
             }
@@ -294,7 +316,8 @@ void ShowMenu(STUDENT* arr, int N)
             case 5:
             {
                 cout << endl;
-                GradeRepresentation(arr, N);
+                Histogram(arr, N);
+                break;
             }
             case 0:
                 return;
@@ -304,53 +327,45 @@ void ShowMenu(STUDENT* arr, int N)
     }
 }
 
-int Partition(int array[], int left, int right) {
-    int pivotIndex = left + (right - left) / 2;
-    int pivotValue = array[pivotIndex];
-    int i = left, j = right;
-    int temp;
-    while(i <= j) {
-        while(array[i] < pivotValue) {
-            i++;
-        }
-        while(array[j] > pivotValue) {
-            j--;
-        }
-        if(i <= j) {
-            temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
-            i++;
-            j--;
-        }
-    }
-    return i;
-}
-
-void QuickSort(int array[], int left, int right) {
-    if(left < right) {
-        int pivotIndex = Partition (array, left, right);
-        QuickSort(array, left, pivotIndex - 1);
-        QuickSort(array, pivotIndex, right);
-    }
-}
-
-void GradeRepresentation (STUDENT *arr, int N) {
-    int gradeArraySize = N*gradeQty;
-    int *gradeArray = new int [gradeArraySize];
+void Histogram (STUDENT *arr, int N) {
+    int i;
+    int gradeQtyArraySize = gradeRangeQty;
+    int *gradeQtyArray = new int [gradeQtyArraySize] {0};
     
-    for (int i=0; i<N; i++) {
-        int rowNumber = i*gradeQty;
-        for (int j=0; j<gradeQty; j++) {
-            gradeArray[rowNumber+j] = (int) (arr[i].oceny[j] * 2);
+    for (i=0; i<N; i++) {
+        for (int j=0; j<gradeQtyPerStudent; j++) {
+            int index = (int) (arr[i].oceny[j] * 2.01);
+            ++gradeQtyArray[index-4];
         }
     }
 
-    QuickSort (gradeArray, 0, gradeArraySize-1);
-
-    for (int i=0; i<gradeArraySize; i++) {
-        cout << gradeArray [i] << " ";
+    int mostPopularGrade = 0;
+    for (i=1; i<gradeQtyArraySize; i++) {
+        if (gradeQtyArray[i] > gradeQtyArray [mostPopularGrade]) mostPopularGrade = i;
     }
+    cout << setw(33) << internal << "ROZKLAD OCEN - HISTOGRAM" << endl << endl;
+    for (i=(gradeQtyArray[mostPopularGrade]);i>=1;i--)
+	{
+	    cout << setw(8) << i;
+		for (int j=0;j<gradeQtyArraySize;j++)
+		{
+			if (gradeQtyArray[j]==i)
+			{
+				cout << "| * ";
+				gradeQtyArray[j]--;
+			}
+			else
+			{
+				cout << "|   ";
+			}
+		}
+		cout << "|" << endl;
+	}
+	cout << "--------+---+---+---+---+---+---+---+" << endl;
+	cout << setw(8) << "Ocena";
+    cout << "| 2 |2.5| 3 |3.5| 4 |4.5| 5 |" << endl;
+    cout << endl;
+    cout << "Najczesciej wystepujaca ocena: " << fixed << setprecision(1) << (mostPopularGrade + 4) / 2.0 << endl;
 
-    delete []gradeArray;
+    delete []gradeQtyArray;
 }
