@@ -218,25 +218,30 @@ bool SaveToTheFile(STUDENT* arr, float TheHighestPGA, int N, string fileSave)
 bool FindString(STUDENT* arr, int N, const string& searchStr)
 {
     bool found = false; // Flaga informująca, czy znaleziono wynik
+    int searchStrLength = searchStr.length();
 
     for (int i = 0; i < N; i++)
     {
-        if (arr[i].im_nazwisko == searchStr)
-        {
-            if (!found)
-            {
-                cout << "Znaleziono wynik dla frazy: \"" << searchStr << "\"" << endl;
+        int j=0;
+        int nameLength = arr[i].im_nazwisko.length();
+
+        for (int k=0; k <= nameLength - searchStrLength; k++) {
+            if (arr[i].im_nazwisko[k] != searchStr[j]) continue;
+            
+            while (arr[i].im_nazwisko[k+j] == searchStr[j]) j++;
+            if (j>=searchStrLength) {
                 found = true;
+                cout << "Student " << arr[i].im_nazwisko << " znaleziony na pozycji " << i + 1 << endl;
+                cout << " " << i + 1 << ". " << arr[i].im_nazwisko << ", oceny: ";
+                for (int h = 0; h < gradeQtyPerStudent; h++)
+                {
+                    cout << setw(3) << fixed << setprecision(1) << arr[i].oceny[h];
+                    cout << ", ";
+                }
+                cout << "srednia ocen: " << arr[i].sredniaOcen << "." << endl << endl;
+            } else {
+                j=0;
             }
-            cout<<endl;
-            cout << "Student " << arr[i].im_nazwisko << " znaleziony na pozycji " << i + 1 << endl;
-            cout<<endl;
-            cout << " " << i + 1 << ". " << arr[i].im_nazwisko << " ";
-            for (int j = 0; j < gradeQtyPerStudent; j++)
-            {
-                cout << setw(5) << fixed << setprecision(2) << arr[i].oceny[j] << " ";
-            }
-            cout << arr[i].sredniaOcen << endl;
         }
     }
 
