@@ -31,6 +31,7 @@ bool SaveToTheFile(STUDENT*, float, int, string);
 bool FindString(STUDENT*, int, const string&);
 void Histogram (STUDENT*, int);
 void ShowMenu(STUDENT*, int);
+string GradeToString (int);
 
 int main()
 {
@@ -345,8 +346,15 @@ void Histogram (STUDENT *arr, int N) {
     }
 
     int mostPopularGrade = 0;
+    string popularGrade = "2.0";
     for (i=1; i<gradeQtyArraySize; i++) {
-        if (gradeQtyArray[i] > gradeQtyArray [mostPopularGrade]) mostPopularGrade = i;
+        if (gradeQtyArray[i] > gradeQtyArray [mostPopularGrade]) {
+            mostPopularGrade = i;
+            popularGrade = GradeToString (mostPopularGrade);
+        } else if (gradeQtyArray[i] == gradeQtyArray [mostPopularGrade]) {
+            popularGrade += ", ";
+            popularGrade += GradeToString (mostPopularGrade);
+        }
     }
     cout << setw(33) << internal << "ROZKLAD OCEN - HISTOGRAM" << endl << endl;
     for (i=(gradeQtyArray[mostPopularGrade]);i>=1;i--)
@@ -370,7 +378,19 @@ void Histogram (STUDENT *arr, int N) {
 	cout << setw(8) << "Ocena";
     cout << "| 2 |2.5| 3 |3.5| 4 |4.5| 5 |" << endl;
     cout << endl;
-    cout << "Najczesciej wystepujaca ocena: " << fixed << setprecision(1) << (mostPopularGrade + 4) / 2.0 << endl;
+    cout << "Najczesciej wystepujaca ocena: " << fixed << setprecision(1) << popularGrade << "." << endl;
 
     delete []gradeQtyArray;
+}
+
+string GradeToString (int given) {
+    string grade;
+    if (given = 0) grade = "2.0";
+    if (given = 1) grade = "2.5";
+    if (given = 2) grade = "3.0";
+    if (given = 3) grade = "3.5";
+    if (given = 4) grade = "4.0";
+    if (given = 5) grade = "4.5";
+    if (given = 6) grade = "5.0";
+    return grade;
 }
