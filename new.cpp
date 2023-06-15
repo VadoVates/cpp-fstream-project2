@@ -45,6 +45,7 @@ int main()
     string fileName, searchStr;
     ifstream fileInput;
     cout << "Podaj nazwe pliku, w ktorym znajduja sie dane studentow (domyslnie to sa \"dane.txt\")" << endl;
+    cout << "Nazwa pliku zrodlowego: ";
     cin >> fileName;
     if (OpenFileRead(fileInput, fileName, numberOfLines) == false)
     {
@@ -53,10 +54,24 @@ int main()
     }
     cout << "Podaj ilu studentow chcesz wczytac (zliczono max. ilosc studentow: " << numberOfLines << "): ";
     cin >> N;
+    do
+        {
     if (N>numberOfLines) {
         cout << "Podana ilosc studentow jest wieksza niz wystepuje w pliku. Wczytano max studentow, czyli: " << numberOfLines << "." << endl;
         N = numberOfLines;
     }
+    else if(N<0)
+    {
+            cout<<"Podano wartosc ujemna, program nie moze wyswietlic poprawnie danych. Prosze podac nowe N"<<endl;
+            cin.clear();
+            cout<<"Poprawiona wartosc: ";
+            cin>>N;
+    }
+    else
+    {
+        cout<<"Wczytano dane"<<endl;
+    }}while(N<0);
+
     STUDENT* arr = new STUDENT[N];
     DrawingRandomNumbersAndFillingArray(fileInput, arr, N);
     ShowMenu(arr, N);
@@ -350,10 +365,10 @@ void Histogram (STUDENT *arr, int N) {
     for (i=1; i<gradeQtyArraySize; i++) {
         if (gradeQtyArray[i] > gradeQtyArray [mostPopularGrade]) {
             mostPopularGrade = i;
-            popularGrade = GradeToString (mostPopularGrade);
+            popularGrade = GradeToString (i);
         } else if (gradeQtyArray[i] == gradeQtyArray [mostPopularGrade]) {
             popularGrade += ", ";
-            popularGrade += GradeToString (mostPopularGrade);
+            popularGrade += GradeToString (i);
         }
     }
     cout << setw(33) << internal << "ROZKLAD OCEN - HISTOGRAM" << endl << endl;
@@ -384,13 +399,13 @@ void Histogram (STUDENT *arr, int N) {
 }
 
 string GradeToString (int given) {
-    string grade;
-    if (given = 0) grade = "2.0";
-    if (given = 1) grade = "2.5";
-    if (given = 2) grade = "3.0";
-    if (given = 3) grade = "3.5";
-    if (given = 4) grade = "4.0";
-    if (given = 5) grade = "4.5";
-    if (given = 6) grade = "5.0";
+    string grade = "";
+    if (given == 0) grade = "2.0";
+    if (given == 1) grade = "2.5";
+    if (given == 2) grade = "3.0";
+    if (given == 3) grade = "3.5";
+    if (given == 4) grade = "4.0";
+    if (given == 5) grade = "4.5";
+    if (given == 6) grade = "5.0";
     return grade;
 }
